@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { poppins: ['Poppins', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+        
+        :root {
+            --sidebar-width: 280px;
+        }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            transition: all 0.3s ease;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border-left: 3px solid #6366f1;
+        }
+        
+        .nav-item.active i {
+            color: #6366f1;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .category-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .sidebar-nav {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        
+        .mobile-menu {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .mobile-menu.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .mobile-nav-link {
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-nav-link:hover {
+            background: rgba(99, 102, 241, 0.08);
+        }
+        
+        .mobile-overlay {
+            background: rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .mobile-overlay.show {
+            opacity: 1;
+        }
+        
+        .menu-icon-hover {
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-nav-link:hover .menu-icon-hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <div class="flex">
+        <aside id="sidebar" class="sidebar bg-white min-h-screen fixed left-0 top-0 flex flex-col shadow-xl">
+            <div class="p-5 border-b border-slate-100">
+                <a href="#" class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                        <span class="text-white text-xl font-bold">Q</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-800">Quiz<span class="text-indigo-600">X</span></h1>
+                        <p class="text-xs text-slate-400">Dashboard</p>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="p-5 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div id="userAvatar" class="w-11 h-11 rounded-full gradient-primary flex items-center justify-center text-white font-bold shadow-md"></div>
+                    <div class="flex-1 min-w-0">
+                        <p id="userName" class="font-bold text-slate-800 truncate"></p>
+                        <p id="userRole" class="text-xs text-indigo-600 font-medium"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4 overflow-y-auto sidebar-nav">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-3">Menu</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" onclick="showPage('dashboard', this)" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-home w-5 text-lg"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showPage('quiz', this)" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-play-circle w-5 text-lg text-emerald-500"></i>
+                            <span class="font-medium">Start Quiz</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showPage('history', this)" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-history w-5 text-lg text-amber-500"></i>
+                            <span class="font-medium">History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showPage('leaderboard', this)" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-trophy w-5 text-lg text-yellow-500"></i>
+                            <span class="font-medium">Leaderboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showPage('settings', this)" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-cog w-5 text-lg text-slate-500"></i>
+                            <span class="font-medium">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 mt-6 px-3">Quick Links</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="index.html" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-home w-5 text-lg text-cyan-500"></i>
+                            <span class="font-medium">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="leaderboard.html" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600">
+                            <i class="fas fa-globe w-5 text-lg text-purple-500"></i>
+                            <span class="font-medium">Global Leaderboard</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 mt-6 px-3">Account</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="index.html" onclick="logout()" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-red-500">
+                            <i class="fas fa-sign-out-alt w-5 text-lg"></i>
+                            <span class="font-medium">Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <div id="sidebarOverlay" class="overlay fixed inset-0 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
+        
+        <main class="main-content flex-1 min-h-screen">
+            <nav class="bg-white/95 backdrop-blur-lg shadow-sm sticky top-0 z-30 border-b border-slate-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                                <i class="fas fa-bars text-slate-600 text-lg"></i>
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <div class="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-lg shadow-indigo-200">
+                                    <span class="text-white text-sm font-bold">Q</span>
+                                </div>
+                                <span class="text-xl font-bold gradient-text">QuizX</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="relative hidden lg:block">
+                                <button id="desktopUserBtn" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                                    <div id="navAvatar" class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold cursor-pointer shadow-md"></div>
+                                    <span id="navName" class="text-sm font-medium text-slate-700"></span>
+                                    <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+                                </button>
+                                <div id="desktopDropdown" class="absolute right-0 top-full mt-2 w-64 rounded-2xl shadow-2xl border border-slate-100 overflow-hidden opacity-0 invisible transition-all duration-200 z-50">
+                                    <div class="p-4 border-b border-slate-100 gradient-primary">
+                                        <div class="flex items-center gap-3">
+                                            <div id="dropdownAvatar" class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold text-lg shadow-lg"></div>
+                                            <div>
+                                                <p id="dropdownName" class="font-bold text-white"></p>
+                                                <p id="dropdownEmail" class="text-xs text-white/80"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="py-3 bg-white">
+                                        <a href="#" onclick="showPage('dashboard', this); closeDesktopDropdown();" class="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-emerald-50 transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                <i class="fas fa-home text-emerald-600 text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Dashboard</span>
+                                        </a>
+                                        <a href="#" onclick="showPage('history', this); closeDesktopDropdown();" class="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-amber-50 transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                                <i class="fas fa-history text-amber-600 text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">History</span>
+                                        </a>
+                                        <a href="leaderboard.html" onclick="closeDesktopDropdown();" class="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50 transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                                <i class="fas fa-trophy text-purple-600 text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Global Leaderboard</span>
+                                        </a>
+                                        <a href="#" onclick="showPage('settings', this); closeDesktopDropdown();" class="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                                <i class="fas fa-cog text-slate-600 text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Settings</span>
+                                        </a>
+                                    </div>
+                                    <div class="py-2 border-t border-slate-100 bg-slate-50">
+                                        <button onclick="logout()" class="w-full flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                                <i class="fas fa-sign-out-alt text-red-500 text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Logout</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                                <i class="fas fa-ellipsis-v text-slate-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <div id="mobileOverlay" class="mobile-overlay fixed inset-0 z-40 hidden lg:hidden" onclick="closeMobileMenu()"></div>
+    
+            <div id="mobileMenu" class="mobile-menu fixed top-0 left-0 right-0 z-50 lg:hidden">
+                <div class="gradient-primary shadow-2xl">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <div id="mobileAvatar" class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold text-2xl shadow-lg"></div>
+                                <div>
+                                    <p id="mobileName" class="font-bold text-white text-lg"></p>
+                                    <p class="text-xs text-white/80">Quiz Player</p>
+                                </div>
+                            </div>
+                            <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                                <i class="fas fa-times text-white"></i>
+                            </button>
+                        </div>
+                        <div class="h-1 bg-white/20 rounded-full overflow-hidden">
+                            <div class="h-full w-2/3 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white">
+                    <div class="py-3">
+                        <a href="#" onclick="showPage('dashboard', this); closeMobileMenu();" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-home text-emerald-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-semibold text-base">Dashboard</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Overview & Stats</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                        </a>
+                        
+                        <a href="#" onclick="showPage('quiz', this); closeMobileMenu();" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-play-circle text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-semibold text-base">Start Quiz</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Choose & Play</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                        </a>
+                        
+                        <a href="#" onclick="showPage('history', this); closeMobileMenu();" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-history text-amber-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-semibold text-base">History</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Past Attempts</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                        </a>
+                        
+                        <a href="leaderboard.html" onclick="closeMobileMenu();" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-trophy text-purple-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-semibold text-base">Global Leaderboard</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Top Performers</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                        </a>
+                        
+                        <a href="#" onclick="showPage('settings', this); closeMobileMenu();" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-cog text-slate-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-semibold text-base">Settings</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Account & Profile</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="py-4 border-t border-slate-100">
+                        <button onclick="logout()" class="mobile-nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-red-500 w-full">
+                            <div class="menu-icon-hover w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-sign-out-alt text-red-500 text-lg"></i>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <span class="font-semibold text-base">Logout</span>
+                                <p class="text-xs text-red-400 mt-0.5">Sign out account</p>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="py-6 px-4 bg-gradient-to-br from-slate-50 to-indigo-50 border-t border-slate-200">
+                        <div class="text-center">
+                            <p class="text-sm font-semibold text-slate-700">QuizX v1.0</p>
+                            <p class="text-xs text-slate-400 mt-1">Made with <span class="text-red-500">❤</span> for learners</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div id="page-dashboard" class="page-section active">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Welcome back, <span id="welcomeName" class="gradient-text"></span>! 👋</h1>
+                        <p class="text-slate-500 mt-1">Ready to challenge yourself today?</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6">
+                        <div class="card-hover rounded-2xl p-5 gradient-primary text-white shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-clipboard-list text-xl"></i>
+                                </div>
+                            </div>
+                            <p id="statAttempts" class="text-3xl font-bold mb-1">0</p>
+                            <p class="text-white/80 text-sm">Quizzes Done</p>
+                        </div>
+                        
+                        <div class="card-hover rounded-2xl p-5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-xl"></i>
+                                </div>
+                            </div>
+                            <p id="statAvg" class="text-3xl font-bold mb-1">0%</p>
+                            <p class="text-white/80 text-sm">Avg Score</p>
+                        </div>
+                        
+                        <div class="card-hover rounded-2xl p-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-star text-xl"></i>
+                                </div>
+                            </div>
+                            <p id="statBest" class="text-3xl font-bold mb-1">0%</p>
+                            <p class="text-white/80 text-sm">Best Score</p>
+                        </div>
+                        
+                        <div class="card-hover rounded-2xl p-5 bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-trophy text-xl"></i>
+                                </div>
+                            </div>
+                            <p id="statRank" class="text-3xl font-bold mb-1">#--</p>
+                            <p class="text-white/80 text-sm">Your Rank</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-3 gap-6 mb-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                            <div class="flex items-center justify-between mb-5">
+                                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Quick Quiz</h2>
+                                <a href="#" onclick="showPage('quiz', this)" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">View All →</a>
+                            </div>
+                            <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                            <h2 class="text-lg sm:text-xl font-bold text-slate-800 mb-5">Recent Activity</h2>
+                            <div id="recentActivity" class="space-y-3"></div>
+                            <div id="noActivity" class="hidden text-center py-8">
+                                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-inbox text-2xl text-slate-400"></i>
+                                </div>
+                                <p class="text-slate-500 text-sm">No activity yet</p>
+                                <a href="#" onclick="showPage('quiz', this)" class="text-indigo-600 font-medium text-sm hover:underline">Start a quiz!</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="page-quiz" class="page-section">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Start Quiz</h1>
+                        <p class="text-slate-500 mt-1">Choose a category and difficulty level</p>
+                    </div>
+                    
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" id="quizCategories"></div>
+                    
+                    <div id="quizModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+                        <div class="bg-white rounded-2xl max-w-md w-full p-6 animate-fade-in">
+                            <div class="text-center mb-5">
+                                <div id="modalIcon" class="w-16 h-16 mx-auto rounded-2xl gradient-primary flex items-center justify-center mb-4">
+                                    <i class="fas fa-bolt text-2xl text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800">Select Difficulty</h3>
+                            </div>
+                            
+                            <div id="modalInfo" class="mb-5 p-4 bg-slate-50 rounded-xl"></div>
+                            
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                <button onclick="startQuizSession('easy')" class="p-3 sm:p-4 rounded-xl border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 transition-all font-medium text-sm">
+                                    <i class="fas fa-seedling mb-1"></i>
+                                    <p class="block">Easy</p>
+                                </button>
+                                <button onclick="startQuizSession('medium')" class="p-3 sm:p-4 rounded-xl border-2 border-amber-500 text-amber-600 hover:bg-amber-50 transition-all font-medium text-sm">
+                                    <i class="fas fa-fire mb-1"></i>
+                                    <p class="block">Medium</p>
+                                </button>
+                                <button onclick="startQuizSession('hard')" class="p-3 sm:p-4 rounded-xl border-2 border-red-500 text-red-600 hover:bg-red-50 transition-all font-medium text-sm">
+                                    <i class="fas fa-skull mb-1"></i>
+                                    <p class="block">Hard</p>
+                                </button>
+                            </div>
+                            
+                            <button onclick="startQuizSession('all')" class="w-full py-3 rounded-xl border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 transition-all font-semibold text-sm">
+                                <i class="fas fa-random mr-2"></i>Random Mix
+                            </button>
+                            
+                            <button onclick="closeModal()" class="w-full mt-3 py-2 text-gray-500 hover:text-gray-700 font-medium text-sm">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="page-history" class="page-section">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Quiz History</h1>
+                        <p class="text-slate-500 mt-1">View all your past quiz attempts</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                        <div id="historyList" class="space-y-4"></div>
+                        <div id="noHistory" class="hidden text-center py-12">
+                            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-history text-3xl text-slate-400"></i>
+                            </div>
+                            <p class="text-slate-500 mb-4">No quiz history yet</p>
+                            <a href="#" onclick="showPage('quiz', this)" class="inline-block px-6 py-3 gradient-primary text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                                Take Your First Quiz
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="page-leaderboard" class="page-section">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Leaderboard</h1>
+                        <p class="text-slate-500 mt-1">Top performers this week</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                        <div id="leaderboardList" class="space-y-3"></div>
+                        <div id="noLeaderboard" class="hidden text-center py-12">
+                            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-trophy text-3xl text-slate-400"></i>
+                            </div>
+                            <p class="text-slate-500 mb-4">No leaderboard data yet</p>
+                            <a href="#" onclick="showPage('quiz', this)" class="inline-block px-6 py-3 gradient-primary text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                                Take a Quiz to Rank!
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-settings" class="page-section">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Account Settings</h1>
+                        <p class="text-slate-500 mt-1">Manage your profile and security</p>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                                <i class="fas fa-user-edit text-indigo-600"></i>
+                                Edit Profile
+                            </h3>
+                            
+                            <form id="dashboardProfileForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                                    <input type="text" id="dashboardEditName" required minlength="2"
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                        placeholder="Enter your full name">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                                    <input type="email" id="dashboardEditEmail" required
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-100 cursor-not-allowed"
+                                        placeholder="Enter your email" readonly>
+                                    <p class="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+                                </div>
+                                
+                                <div id="dashboardProfileError" class="hidden text-red-500 text-sm text-center py-2 bg-red-50 rounded-lg"></div>
+                                
+                                <button type="submit" id="dashboardSaveProfileBtn" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-save"></i>
+                                    Save Changes
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                                <i class="fas fa-lock text-indigo-600"></i>
+                                Change Password
+                            </h3>
+                            
+                            <form id="dashboardPasswordForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
+                                    <input type="password" id="dashboardCurrentPassword" 
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                        placeholder="Enter current password">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">New Password</label>
+                                    <input type="password" id="dashboardNewPassword" 
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                        placeholder="Enter new password" minlength="6">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
+                                    <input type="password" id="dashboardConfirmPassword" 
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                        placeholder="Confirm new password" minlength="6">
+                                </div>
+                                
+                                <div id="dashboardPasswordError" class="hidden text-red-500 text-sm text-center py-2 bg-red-50 rounded-lg"></div>
+                                <div id="dashboardPasswordSuccess" class="hidden text-emerald-500 text-sm text-center py-2 bg-emerald-50 rounded-lg"></div>
+                                
+                                <button type="submit" id="dashboardChangePasswordBtn" class="w-full bg-slate-800 text-white py-3 rounded-xl font-semibold hover:bg-slate-900 transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-key"></i>
+                                    Change Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mt-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                            <i class="fas fa-camera text-indigo-600"></i>
+                            Profile Photo
+                        </h3>
+                        
+                        <div class="flex flex-col sm:flex-row items-center gap-6">
+                            <div id="dashboardProfilePhoto" class="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
+                                U
+                            </div>
+                            <div class="flex-1 text-center sm:text-left">
+                                <input type="file" id="dashboardPhotoInput" accept="image/*" class="hidden" onchange="updateDashboardPhoto(event)">
+                                <button onclick="document.getElementById('dashboardPhotoInput').click()" class="gradient-primary text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2">
+                                    <i class="fas fa-upload"></i>
+                                    Change Photo
+                                </button>
+                                <p class="text-xs text-slate-400 mt-2">JPG, PNG or GIF. Max 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/quiz.js"></script>
+    <script>
+        if (!requireAuth()) { throw new Error('Auth required'); }
+        
+        let selectedCategoryId = null;
+        let currentUser = null;
+
+        async function init() {
+            await initializeDatabase();
+            currentUser = getCurrentUser();
+            loadUserInfo();
+            
+            const needsRefresh = sessionStorage.getItem('refresh_dashboard') === 'true';
+            
+            if (needsRefresh) {
+                sessionStorage.removeItem('refresh_dashboard');
+            }
+            
+            loadCategories();
+            loadRecentActivity();
+            await loadStats();
+            
+            if (needsRefresh) {
+                await refreshData();
+            }
+        }
+        
+        init();
+        
+        async function refreshData() {
+            currentUser = getCurrentUser();
+            loadUserInfo();
+            await loadStats();
+            loadRecentActivity();
+            
+            const historySection = document.getElementById('page-history');
+            const leaderboardSection = document.getElementById('page-leaderboard');
+            
+            if (historySection && historySection.classList.contains('active')) {
+                await loadHistory();
+            }
+            if (leaderboardSection && leaderboardSection.classList.contains('active')) {
+                await loadLeaderboard();
+            }
+        }
+        
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'quizx_current_user') {
+                currentUser = getCurrentUser();
+                loadUserInfo();
+            }
+        });
+        
+        window.addEventListener('userProfileUpdated', function() {
+            currentUser = getCurrentUser();
+            loadUserInfo();
+        });
+        
+        let desktopDropdownOpen = false;
+        
+        function toggleDesktopDropdown() {
+            const dropdown = document.getElementById('desktopDropdown');
+            if (desktopDropdownOpen) {
+                dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = false;
+            } else {
+                dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = true;
+            }
+        }
+        
+        function closeDesktopDropdown() {
+            if (desktopDropdownOpen) {
+                const dropdown = document.getElementById('desktopDropdown');
+                dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = false;
+            }
+        }
+        
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('open');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('mobileOverlay').classList.add('show');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('mobileOverlay').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('mobileOverlay').classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('desktopUserBtn').addEventListener('click', toggleDesktopDropdown);
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#desktopUserBtn') && !e.target.closest('#desktopDropdown')) {
+                closeDesktopDropdown();
+            }
+        });
+        document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.add('hidden');
+        }
+        
+        function showPage(page, el) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
+            
+            closeSidebar();
+            closeMobileMenu();
+            
+            if (page === 'history') loadHistory();
+            if (page === 'leaderboard') loadLeaderboard();
+            if (page === 'settings') loadSettingsPage();
+        }
+        
+        function loadUserInfo() {
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const session = sessionData ? JSON.parse(sessionData) : {};
+            const user = session.user || { name: 'User', role: 'user' };
+            const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+            
+            if (user.photo) {
+                const photoHtml = `<img src="${user.photo}" alt="Avatar" class="w-full h-full rounded-full object-cover">`;
+                document.getElementById('userAvatar').innerHTML = photoHtml;
+                document.getElementById('navAvatar').innerHTML = photoHtml;
+                document.getElementById('dropdownAvatar').innerHTML = photoHtml;
+                document.getElementById('mobileAvatar').innerHTML = photoHtml;
+            } else {
+                document.getElementById('userAvatar').innerHTML = `<span class="w-full h-full flex items-center justify-center text-white text-lg font-bold">${initial}</span>`;
+                document.getElementById('navAvatar').innerHTML = `<span class="w-full h-full flex items-center justify-center text-white text-sm font-bold">${initial}</span>`;
+                document.getElementById('dropdownAvatar').textContent = initial;
+                document.getElementById('mobileAvatar').textContent = initial;
+            }
+            
+            document.getElementById('userName').textContent = user.name || 'User';
+            document.getElementById('userRole').textContent = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User';
+            document.getElementById('navName').textContent = user.name || 'User';
+            document.getElementById('dropdownName').textContent = user.name || 'User';
+            document.getElementById('dropdownEmail').textContent = user.email || '';
+            document.getElementById('mobileName').textContent = user.name || 'User';
+            document.getElementById('welcomeName').textContent = (user.name || 'User').split(' ')[0];
+            
+            currentUser = user;
+        }
+        
+        async function loadStats() {
+            try {
+                const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                const user = sessionData ? JSON.parse(sessionData).user : null;
+                const db = getDB();
+                const allAttempts = db.attempts || [];
+                
+                let userAttempts = [];
+                if (user && user.id) {
+                    userAttempts = allAttempts.filter(a => a.userId === user.id);
+                }
+                
+                const totalAttempts = userAttempts.length;
+                let avgScore = 0;
+                let bestScore = 0;
+                
+                if (totalAttempts > 0) {
+                    const totalPct = userAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0);
+                    avgScore = Math.round(totalPct / totalAttempts);
+                    bestScore = Math.max(...userAttempts.map(a => a.percentage || 0));
+                }
+                
+                document.getElementById('statAttempts').textContent = totalAttempts;
+                document.getElementById('statAvg').textContent = avgScore + '%';
+                document.getElementById('statBest').textContent = bestScore + '%';
+                
+                const leaderboard = await buildLeaderboard();
+                const userId = user ? user.id : null;
+                const userRank = userId ? leaderboard.findIndex(e => e.userId === userId) + 1 : 0;
+                document.getElementById('statRank').textContent = userRank > 0 ? '#' + userRank : '--';
+            } catch (e) {
+                console.error('Error loading stats:', e);
+            }
+        }
+        
+        async function loadCategories() {
+            const categories = await getCategories();
+            const colors = ['from-blue-500 to-indigo-600', 'from-emerald-500 to-teal-600', 'from-amber-500 to-orange-600', 'from-violet-500 to-purple-600'];
+            const icons = ['fa-code', 'fa-flask', 'fa-landmark', 'fa-lightbulb'];
+            
+            const grid = document.getElementById('categoriesGrid');
+            if (categories.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 col-span-2 text-center py-8">No categories available</p>';
+            } else {
+                grid.innerHTML = categories.filter(c => c.isActive).map((cat, index) => `
+                    <div onclick="openQuizModal('${cat.id}')" class="category-card p-5 rounded-2xl bg-gradient-to-br ${colors[index % colors.length]} text-white">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                <i class="fas ${icons[index % icons.length]} text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">${cat.name}</h4>
+                                <p class="text-white/80 text-sm">${cat.description}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-white/80 text-sm">Tap to start</span>
+                            <i class="fas fa-play-circle text-2xl"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            const quizGrid = document.getElementById('quizCategories');
+            if (categories.length === 0) {
+                quizGrid.innerHTML = '<p class="text-slate-500 col-span-4 text-center py-8">No categories available</p>';
+            } else {
+                quizGrid.innerHTML = categories.filter(c => c.isActive).map((cat, index) => `
+                    <div class="category-card bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${colors[index % colors.length]} flex items-center justify-center mb-4 shadow-lg">
+                            <i class="fas ${icons[index % icons.length]} text-2xl text-white"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-1">${cat.name}</h4>
+                        <p class="text-slate-500 text-sm mb-4">${cat.description}</p>
+                        <button onclick="openQuizModal('${cat.id}')" class="w-full py-2.5 gradient-primary text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all">
+                            <i class="fas fa-play mr-2"></i> Start Quiz
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        async function loadRecentActivity() {
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const user = sessionData ? JSON.parse(sessionData).user : null;
+            
+            if (!user || !user.id) return;
+            
+            const db = getDB();
+            const allAttempts = db.attempts || [];
+            const userAttempts = allAttempts.filter(a => a.userId === user.id);
+            
+            const container = document.getElementById('recentActivity');
+            const noActivity = document.getElementById('noActivity');
+            
+            const recent = userAttempts.slice(-5).reverse();
+            
+            if (recent.length === 0) {
+                container.classList.add('hidden');
+                noActivity.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noActivity.classList.add('hidden');
+            
+            const allCategories = db.categories || [];
+            
+            container.innerHTML = recent.map(a => {
+                const category = allCategories.find(c => c.id === a.categoryId);
+                const scoreColor = (a.percentage || 0) >= 80 ? 'text-emerald-600' : (a.percentage || 0) >= 60 ? 'text-amber-600' : 'text-red-600';
+                const bgColor = (a.percentage || 0) >= 80 ? 'bg-emerald-50' : (a.percentage || 0) >= 60 ? 'bg-amber-50' : 'bg-red-50';
+                const date = new Date(a.completedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const icon = category?.icon || 'fa-question';
+                
+                return `
+                    <div class="flex items-center justify-between p-4 ${bgColor} rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas ${icon} text-lg text-slate-400"></i>
+                            <div>
+                                <p class="font-semibold text-slate-800 text-sm">${category?.name || 'General Quiz'}</p>
+                                <p class="text-xs text-slate-500">${date}</p>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold ${scoreColor}">${a.percentage || 0}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function loadHistory() {
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const user = sessionData ? JSON.parse(sessionData).user : null;
+            
+            if (!user || !user.id) return;
+            
+            const db = getDB();
+            const allAttempts = db.attempts || [];
+            const userAttempts = allAttempts.filter(a => a.userId === user.id);
+            
+            const container = document.getElementById('historyList');
+            const noHistory = document.getElementById('noHistory');
+            
+            const attemptsList = userAttempts || [];
+            if (attemptsList.length === 0) {
+                container.classList.add('hidden');
+                noHistory.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noHistory.classList.add('hidden');
+            
+            const sorted = [...attemptsList].reverse();
+            const allCategories = db.categories || [];
+            
+            container.innerHTML = sorted.map(a => {
+                const category = allCategories.find(c => c.id === a.categoryId);
+                const scoreColor = (a.percentage || 0) >= 80 ? 'text-emerald-600 bg-emerald-50' : (a.percentage || 0) >= 60 ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50';
+                const date = new Date(a.completedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const icon = category?.icon || 'fa-question';
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
+                                <i class="fas ${icon} text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-800">${category?.name || 'General Quiz'}</p>
+                                <p class="text-xs text-slate-500">${date}</p>
+                                <p class="text-xs text-slate-500">${a.score || 0}/${a.totalQuestions || 0} correct</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-3 py-1 rounded-full ${scoreColor} font-bold text-sm">${a.percentage || 0}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function buildLeaderboard() {
+            const db = getDB();
+            const users = db.users || [];
+            const attempts = db.attempts || [];
+            
+            const userScores = {};
+            for (const attempt of attempts) {
+                if (!userScores[attempt.userId]) {
+                    const user = users.find(u => u.id === attempt.userId);
+                    userScores[attempt.userId] = {
+                        userId: attempt.userId,
+                        name: user ? user.name : attempt.userName || 'Unknown',
+                        attempts: 0,
+                        totalPercentage: 0,
+                        bestScore: 0
+                    };
+                }
+                userScores[attempt.userId].attempts++;
+                userScores[attempt.userId].totalPercentage += (attempt.percentage || 0);
+                if ((attempt.percentage || 0) > userScores[attempt.userId].bestScore) {
+                    userScores[attempt.userId].bestScore = attempt.percentage || 0;
+                }
+            }
+            
+            const leaderboardWithNames = Object.values(userScores).map(entry => ({
+                userId: entry.userId,
+                name: entry.name,
+                attempts: entry.attempts,
+                avgScore: entry.attempts > 0 ? Math.round(entry.totalPercentage / entry.attempts) : 0,
+                bestScore: entry.bestScore
+            }));
+            
+            return leaderboardWithNames.sort((a, b) => b.bestScore - a.bestScore);
+        }
+        
+        async function loadLeaderboard() {
+            const leaderboard = await buildLeaderboard();
+            const container = document.getElementById('leaderboardList');
+            const noLeaderboard = document.getElementById('noLeaderboard');
+            
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const session = sessionData ? JSON.parse(sessionData) : {};
+            const currentUserId = session.user ? session.user.id : null;
+            
+            if (!leaderboard || leaderboard.length === 0) {
+                container.classList.add('hidden');
+                noLeaderboard.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noLeaderboard.classList.add('hidden');
+            
+            container.innerHTML = leaderboard.map((entry, index) => {
+                const isCurrentUser = currentUserId && entry.userId === currentUserId;
+                const rankColors = ['from-yellow-400 to-amber-500', 'from-slate-300 to-slate-400', 'from-amber-600 to-amber-700'];
+                const rankBg = index < 3 ? rankColors[index] : 'from-slate-200 to-slate-300';
+                const entryName = entry.name || 'Unknown';
+                
+                return `
+                    <div class="flex items-center gap-4 p-4 rounded-xl ${isCurrentUser ? 'bg-indigo-50 border-2 border-indigo-200' : 'bg-slate-50'}">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br ${rankBg} flex items-center justify-center text-white font-bold shadow-md">
+                            ${index + 1}
+                        </div>
+                        <div class="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold">
+                            ${entryName.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-slate-800 ${isCurrentUser ? 'text-indigo-700' : ''}">${entryName} ${isCurrentUser ? '(You)' : ''}</p>
+                            <p class="text-xs text-slate-500">${entry.attempts || 1} quizzes • Avg: ${entry.avgScore || 0}%</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-slate-800">${entry.bestScore || 0}%</p>
+                            <p class="text-xs text-slate-500">Best</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function openQuizModal(categoryId) {
+            selectedCategoryId = categoryId;
+            const category = await getCategoryById(categoryId);
+            const questions = await getQuestions(categoryId);
+            
+            document.getElementById('modalInfo').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas ${category?.icon || 'fa-question'} text-2xl text-indigo-500"></i>
+                    <div>
+                        <h4 class="font-semibold text-slate-800">${category?.name || 'Unknown'}</h4>
+                        <p class="text-sm text-slate-500">${questions.length} questions available</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('quizModal').classList.remove('hidden');
+            document.getElementById('quizModal').classList.add('flex');
+        }
+        
+        function closeModal() {
+            document.getElementById('quizModal').classList.add('hidden');
+            document.getElementById('quizModal').classList.remove('flex');
+        }
+        
+        function startQuizSession(difficulty) {
+            const session = startQuiz(selectedCategoryId, difficulty);
+            if (session && session.questions.length > 0) {
+                window.location.href = 'quiz.html';
+            } else {
+                alert('No questions available for this difficulty level.');
+                closeModal();
+            }
+        }
+
+        async function loadSettingsPage() {
+            const user = getCurrentUser() || currentUser || { name: '', email: '' };
+            document.getElementById('dashboardEditName').value = user.name || '';
+            document.getElementById('dashboardEditEmail').value = user.email || '';
+            await updateDashboardProfilePhoto();
+        }
+
+        async function updateDashboardProfilePhoto() {
+            const photoDiv = document.getElementById('dashboardProfilePhoto');
+            const user = getCurrentUser() || currentUser || { name: 'U' };
+            const dbUser = await getUserById(user.id);
+            if (dbUser && dbUser.photo) {
+                photoDiv.innerHTML = `<img src="${dbUser.photo}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
+            } else {
+                const name = user.name || 'U';
+                photoDiv.textContent = name.charAt(0).toUpperCase();
+            }
+        }
+
+        function updateDashboardPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoData = e.target.result;
+                
+                const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    if (session.user && session.user.id) {
+                        const db = getDB();
+                        const userIndex = db.users ? db.users.findIndex(u => u.id === session.user.id) : -1;
+                        if (userIndex !== -1) {
+                            db.users[userIndex].photo = photoData;
+                            saveDB(db);
+                        }
+                        session.user.photo = photoData;
+                        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(session));
+                    }
+                }
+                
+                loadUserInfo();
+                loadSettingsPage();
+                window.dispatchEvent(new Event('userProfileUpdated'));
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('dashboardProfileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newName = document.getElementById('dashboardEditName').value.trim();
+            const errorDiv = document.getElementById('dashboardProfileError');
+            const saveBtn = document.getElementById('dashboardSaveProfileBtn');
+            
+            errorDiv.classList.add('hidden');
+            
+            if (newName.length < 2) {
+                errorDiv.textContent = 'Name must be at least 2 characters';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            
+            try {
+                const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    if (session.user && session.user.id) {
+                        const db = getDB();
+                        const userIndex = db.users ? db.users.findIndex(u => u.id === session.user.id) : -1;
+                        if (userIndex !== -1) {
+                            db.users[userIndex].name = newName;
+                            saveDB(db);
+                        }
+                        session.user.name = newName;
+                        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(session));
+                    }
+                }
+                
+                loadUserInfo();
+                loadSettingsPage();
+                window.dispatchEvent(new Event('userProfileUpdated'));
+                
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                setTimeout(() => {
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                    saveBtn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                errorDiv.textContent = 'Failed to update profile';
+                errorDiv.classList.remove('hidden');
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                saveBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('dashboardPasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPass = document.getElementById('dashboardCurrentPassword').value;
+            const newPass = document.getElementById('dashboardNewPassword').value;
+            const confirmPass = document.getElementById('dashboardConfirmPassword').value;
+            const errorDiv = document.getElementById('dashboardPasswordError');
+            const successDiv = document.getElementById('dashboardPasswordSuccess');
+            const saveBtn = document.getElementById('dashboardChangePasswordBtn');
+            
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+            
+            if (newPass.length < 6) {
+                errorDiv.textContent = 'New password must be at least 6 characters';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                errorDiv.textContent = 'New passwords do not match';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+            
+            try {
+                const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                if (!sessionData) {
+                    errorDiv.textContent = 'User session not found';
+                    errorDiv.classList.remove('hidden');
+                    saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                
+                const session = JSON.parse(sessionData);
+                if (!session.user || !session.user.id) {
+                    errorDiv.textContent = 'User not found';
+                    errorDiv.classList.remove('hidden');
+                    saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                
+                const db = getDB();
+                const userIndex = db.users ? db.users.findIndex(u => u.id === session.user.id) : -1;
+                
+                if (userIndex === -1) {
+                    errorDiv.textContent = 'User not found in database';
+                    errorDiv.classList.remove('hidden');
+                    saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                
+                const dbUser = db.users[userIndex];
+                const hashedCurrent = hashPassword(currentPass);
+                
+                if (dbUser.password !== hashedCurrent) {
+                    errorDiv.textContent = 'Current password is incorrect';
+                    errorDiv.classList.remove('hidden');
+                    saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                
+                const hashedNew = hashPassword(newPass);
+                db.users[userIndex].password = hashedNew;
+                saveDB(db);
+                
+                successDiv.textContent = 'Password changed successfully!';
+                successDiv.classList.remove('hidden');
+                
+                document.getElementById('dashboardCurrentPassword').value = '';
+                document.getElementById('dashboardNewPassword').value = '';
+                document.getElementById('dashboardConfirmPassword').value = '';
+                
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Changed!';
+                setTimeout(() => {
+                    saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                    saveBtn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                errorDiv.textContent = 'Failed to change password';
+                errorDiv.classList.remove('hidden');
+                saveBtn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+                saveBtn.disabled = false;
+            }
+        });
+
+        loadSettingsPage();
+    </script>
+</body>
+</html>

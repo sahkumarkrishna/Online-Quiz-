@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <div id="resultContent">
+            <div class="flex items-center justify-center min-h-[50vh]">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/quiz.js"></script>
+    <script>
+        if (!requireAuth()) { throw new Error('Auth required'); }
+
+        async function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+
+        async function renderAnswer(answer, index, currentSession) {
+            const question = currentSession ? currentSession.questions.find(q => q.id === answer.questionId) : null;
+            if (!question) return '';
+            
+            return `
+                <div class="border rounded-xl p-4 ${answer.isCorrect ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${answer.isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white font-bold text-sm flex-shrink-0">
+                            ${index + 1}
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 mb-2">${question.text}</p>
+                            <p class="text-sm ${answer.isCorrect ? 'text-emerald-600' : 'text-red-600'}">
+                                Your answer: ${question.options[answer.selectedAnswer]}
+                                ${answer.isCorrect ? ' ✓' : ''}
+                            </p>
+                            ${!answer.isCorrect ? `
+                                <p class="text-sm text-emerald-600 mt-1">
+                                    Correct: ${question.options[question.correctAnswer]}
+                                </p>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadResults() {
+            await initializeDatabase();
+            
+            const result = JSON.parse(sessionStorage.getItem('quiz_result'));
+            
+            if (!result) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const db = getDB();
+            const category = db.categories ? db.categories.find(c => c.id === result.categoryId) : null;
+            const isPassing = (result.percentage || 0) >= 60;
+
+            let answersHtml = '<p class="text-gray-500">No answers to review.</p>';
+
+            document.getElementById('resultContent').innerHTML = `
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <div class="${isPassing ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-red-500 to-rose-500'} p-8 text-white text-center">
+                        <div class="text-6xl mb-4">${isPassing ? '🎉' : '😔'}</div>
+                        <h1 class="text-3xl font-bold mb-2">${isPassing ? 'Congratulations!' : 'Keep Practicing!'}</h1>
+                        <p class="text-lg opacity-90">${isPassing ? 'You passed the quiz!' : 'You can do better next time.'}</p>
+                    </div>
+
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+                            <div class="text-center p-4 bg-indigo-50 rounded-xl">
+                                <p class="text-4xl font-bold text-indigo-600">${result.percentage || 0}%</p>
+                                <p class="text-sm text-gray-500 mt-1">Your Score</p>
+                            </div>
+                            <div class="text-center p-4 bg-emerald-50 rounded-xl">
+                                <p class="text-4xl font-bold text-emerald-600">${result.score || 0}</p>
+                                <p class="text-sm text-gray-500 mt-1">Correct Answers</p>
+                            </div>
+                            <div class="text-center p-4 bg-amber-50 rounded-xl">
+                                <p class="text-4xl font-bold text-amber-600">${(result.totalQuestions || 0) - (result.score || 0)}</p>
+                                <p class="text-sm text-gray-500 mt-1">Wrong Answers</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                            <div class="flex items-center gap-4 mb-4">
+                                <span class="text-4xl">📝</span>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">${category ? category.name : 'General Quiz'}</h3>
+                                    <p class="text-sm text-gray-500">${result.totalQuestions || 0} questions</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-gray-600">Time: ${await formatTime(result.timeTaken || 0)}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 ${isPassing ? 'text-emerald-500' : 'text-red-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${isPassing ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'}"></path>
+                                    </svg>
+                                    <span class="text-gray-600">${isPassing ? 'Passed' : 'Failed'} (60% to pass)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="font-semibold text-gray-800 mb-4">Review Answers</h3>
+                        <div class="space-y-4">
+                            ${answersHtml}
+                        </div>
+
+                        <div class="flex gap-4 mt-8">
+                            <a href="dashboard.html" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold text-center hover:bg-gray-200 transition-all">
+                                Back to Dashboard
+                            </a>
+                            <a href="dashboard.html" class="flex-1 py-3 bg-indigo-600 text-white rounded-lg font-semibold text-center hover:bg-indigo-700 transition-all">
+                                Retake Quiz
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        loadResults();
+    </script>
+</body>
+</html>

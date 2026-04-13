@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        .floating-delay-1 { animation-delay: -1s; }
+        .floating-delay-2 { animation-delay: -2s; }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: blob 7s infinite;
+        }
+        
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: #6366f1;
+            top: -100px;
+            left: -100px;
+        }
+        
+        .blob-2 {
+            width: 300px;
+            height: 300px;
+            background: #ec4899;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -3s;
+        }
+        
+        .blob-3 {
+            width: 250px;
+            height: 250px;
+            background: #8b5cf6;
+            top: 50%;
+            left: 50%;
+            animation-delay: -5s;
+        }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .input-float {
+            transition: all 0.3s ease;
+        }
+        
+        .input-float:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.5);
+        }
+        
+        .btn-hover {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-hover:hover::before {
+            left: 100%;
+        }
+        
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        
+        .social-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        
+        .password-toggle {
+            transition: all 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #6366f1;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            animation: pulse-ring 2s infinite;
+        }
+        
+        .illustration-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .check-icon {
+            animation: checkmark 0.3s ease forwards;
+        }
+        
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Left Side - Illustration -->
+    <div class="hidden lg:flex lg:w-1/2 illustration-bg relative overflow-hidden">
+        <!-- Animated Blobs -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        
+        <div class="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
+            <!-- Logo -->
+            <div class="absolute top-8 left-8 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <span class="text-white text-2xl font-bold">Q</span>
+                </div>
+                <span class="text-2xl font-bold">QuizX</span>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="text-center max-w-md">
+                <!-- Floating Illustration Elements -->
+                <div class="relative mb-8">
+                    <div class="absolute -top-8 -left-8 w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm floating floating-delay-1 flex items-center justify-center">
+                        <i class="fas fa-brain text-3xl"></i>
+                    </div>
+                    <div class="absolute -top-4 -right-12 w-16 h-16 rounded-full bg-yellow-400/30 backdrop-blur-sm floating floating-delay-2 flex items-center justify-center">
+                        <i class="fas fa-star text-yellow-300 text-2xl"></i>
+                    </div>
+                    <div class="absolute -bottom-4 -left-4 w-14 h-14 rounded-xl bg-green-400/30 backdrop-blur-sm floating flex items-center justify-center">
+                        <i class="fas fa-trophy text-green-300 text-xl"></i>
+                    </div>
+                    
+                    <!-- Main Card -->
+                    <div class="glass-effect rounded-3xl p-8 relative pulse-ring">
+                        <div class="w-24 h-24 mx-auto rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+                            <i class="fas fa-graduation-cap text-5xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Learn & Grow</h3>
+                        <p class="text-white/80 text-sm">Challenge yourself with interactive quizzes and track your progress</p>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="flex justify-center gap-8 mt-8">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">10K+</div>
+                        <div class="text-white/60 text-sm">Questions</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">5K+</div>
+                        <div class="text-white/60 text-sm">Users</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">50K+</div>
+                        <div class="text-white/60 text-sm">Quizzes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Quote -->
+            <div class="absolute bottom-8 left-8 right-8 glass-effect rounded-xl p-4">
+                <p class="text-white/90 text-sm italic">"Education is not the filling of a pail, but the lighting of a fire."</p>
+                <p class="text-white/60 text-xs mt-2">- William Butler Yeats</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Side - Login Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
+        <div class="w-full max-w-md">
+            <!-- Mobile Logo -->
+            <div class="lg:hidden text-center mb-8">
+                <a href="index.html" class="inline-flex items-center gap-2">
+                    <div class="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
+                        <span class="text-white text-2xl font-bold">Q</span>
+                    </div>
+                    <span class="text-3xl font-bold gradient-text">QuizX</span>
+                </a>
+            </div>
+            
+            <!-- Form Header -->
+            <div class="animate-fade-in opacity-0" style="animation-fill-mode: forwards;">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Welcome Back!</h1>
+                <p class="text-gray-500 mb-8">Sign in to continue your learning journey</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-5">
+                <div class="animate-fade-in opacity-0 animate-delay-100" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input type="email" id="email" required
+                            class="input-float w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Enter your email">
+                    </div>
+                </div>
+                
+                <div class="animate-fade-in opacity-0 animate-delay-200" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="password" required
+                            class="input-float w-full pl-12 pr-12 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Enter your password">
+                        <button type="button" onclick="togglePassword()" class="password-toggle absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <i id="eyeIcon" class="fas fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between animate-fade-in opacity-0 animate-delay-200" style="animation-fill-mode: forwards;">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                </div>
+                
+                <div id="errorMsg" class="hidden animate-fade-in">
+                    <div class="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="errorText"></span>
+                    </div>
+                </div>
+                
+                <button type="submit" id="loginBtn" 
+                    class="btn-hover animate-fade-in opacity-0 animate-delay-300 w-full gradient-primary text-white py-4 rounded-2xl font-semibold text-lg shadow-lg shadow-indigo-300/50"
+                    style="animation-fill-mode: forwards;">
+                    Sign In
+                </button>
+            </form>
+            
+            <!-- Register Link -->
+            <p class="text-center mt-8 text-gray-600 animate-fade-in opacity-0 animate-delay-400" style="animation-fill-mode: forwards;">
+                Don't have an account? 
+                <a href="register.html" class="text-indigo-600 font-semibold hover:text-indigo-500">Create Account</a>
+            </p>
+            
+            <!-- Back to Home -->
+            <div class="text-center mt-6">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-400 hover:text-indigo-600 transition-colors text-sm">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+            
+            <!-- Admin Link -->
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <a href="admin-login.html" class="flex items-center justify-center gap-2 py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all text-sm">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin Login
+                </a>
+                <p class="text-center text-xs text-gray-400 mt-3">Admin: kumarkrishna9801552@gmail.com / krishna@123</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        initializeDatabase();
+
+        const session = localStorage.getItem('quizx_current_user');
+        if (session) {
+            const userData = JSON.parse(session);
+            if (userData.user && userData.user.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else if (userData.user) {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing in...';
+
+            const result = await login(email, password);
+
+            if (result.success) {
+                errorMsg.classList.add('hidden');
+                loginBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Success!';
+                loginBtn.classList.remove('gradient-primary');
+                loginBtn.classList.add('bg-green-500');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 500);
+            } else {
+                errorText.textContent = result.message;
+                errorMsg.classList.remove('hidden');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Sign In';
+                loginBtn.classList.add('animate-shake');
+                setTimeout(() => {
+                    loginBtn.classList.remove('animate-shake');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

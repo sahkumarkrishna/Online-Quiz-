@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Leaderboard - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { poppins: ['Poppins', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-menu {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .mobile-menu.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .dropdown-item {
+            transition: all 0.15s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.08);
+        }
+        
+        .overlay {
+            background: rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .overlay.show {
+            opacity: 1;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        
+        .menu-item-icon {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover .menu-item-icon {
+            transform: scale(1.1);
+        }
+        
+        .active-indicator {
+            position: relative;
+        }
+        
+        .active-indicator::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-indigo-50 to-slate-100 min-h-screen">
+    <nav class="bg-white/95 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-slate-100">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <a href="dashboard.html" class="p-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                        <i class="fas fa-arrow-left text-slate-600"></i>
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <div class="w-9 h-9 rounded-lg gradient-bg flex items-center justify-center shadow-lg shadow-indigo-200">
+                            <span class="text-white text-sm font-bold">Q</span>
+                        </div>
+                        <span class="text-xl font-bold gradient-text hidden sm:block">QuizX</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <div class="relative hidden sm:block">
+                        <button id="desktopUserBtn" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                            <div id="navAvatar" class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-white text-sm font-bold shadow-md"></div>
+                            <span id="navName" class="text-sm font-medium text-slate-700"></span>
+                            <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+                        </button>
+                        <div id="desktopDropdown" class="absolute right-0 top-full mt-2 w-64 rounded-2xl shadow-2xl border border-slate-100 overflow-hidden opacity-0 invisible transition-all duration-200 z-50">
+                            <div class="p-4 border-b border-slate-100 gradient-bg">
+                                <div class="flex items-center gap-3">
+                                    <div id="dropdownAvatar" class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold text-lg shadow-lg"></div>
+                                    <div>
+                                        <p id="dropdownName" class="font-bold text-white"></p>
+                                        <p id="dropdownEmail" class="text-xs text-white/80"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-3 bg-white">
+                                <a href="dashboard.html" class="dropdown-item flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <i class="fas fa-home text-emerald-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Dashboard</span>
+                                </a>
+                                <a href="dashboard.html#history" class="dropdown-item flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                        <i class="fas fa-history text-amber-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">History</span>
+                                </a>
+                                <a href="dashboard.html#settings" class="dropdown-item flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-slate-600">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                        <i class="fas fa-cog text-slate-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Settings</span>
+                                </a>
+                            </div>
+                            <div class="py-2 border-t border-slate-100 bg-slate-50">
+                                <button onclick="logout()" class="dropdown-item w-full flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl text-red-500">
+                                    <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-sign-out-alt text-red-500 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="mobileMenuBtn" class="sm:hidden p-2 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200">
+                        <i class="fas fa-bars text-slate-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div id="mobileOverlay" class="overlay fixed inset-0 z-40 hidden sm:hidden" onclick="closeMobileMenu()"></div>
+    
+    <div id="mobileMenu" class="mobile-menu fixed top-0 left-0 right-0 z-50 sm:hidden">
+        <div class="gradient-bg shadow-2xl">
+            <div class="p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div id="mobileAvatar" class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold text-2xl shadow-lg"></div>
+                        <div>
+                            <p id="mobileName" class="font-bold text-white text-lg"></p>
+                            <p class="text-xs text-white/80">Quiz Player</p>
+                        </div>
+                    </div>
+                    <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                        <i class="fas fa-times text-white"></i>
+                    </button>
+                </div>
+                <div class="h-1 bg-white/20 rounded-full overflow-hidden">
+                    <div class="h-full w-2/3 bg-white rounded-full"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white">
+            <div class="py-3">
+                <a href="dashboard.html" class="nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                    <div class="menu-item-icon w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shadow-sm">
+                        <i class="fas fa-home text-emerald-600 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-base">Dashboard</span>
+                        <p class="text-xs text-slate-400 mt-0.5">Overview & Stats</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                </a>
+                
+                <a href="dashboard.html#quiz" class="nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                    <div class="menu-item-icon w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                        <i class="fas fa-play-circle text-blue-600 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-base">Start Quiz</span>
+                        <p class="text-xs text-slate-400 mt-0.5">Choose & Play</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                </a>
+                
+                <a href="dashboard.html#history" class="nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                    <div class="menu-item-icon w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                        <i class="fas fa-history text-amber-600 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-base">History</span>
+                        <p class="text-xs text-slate-400 mt-0.5">Past Attempts</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                </a>
+                
+                <div class="mx-3 my-2 py-2 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100">
+                    <a href="#" class="flex items-center gap-4 px-4 py-3.5">
+                        <div class="menu-item-icon w-12 h-12 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-indigo-200">
+                            <i class="fas fa-trophy text-white text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-bold text-base gradient-text">Leaderboard</span>
+                            <p class="text-xs text-indigo-400 mt-0.5">Global Rankings</p>
+                        </div>
+                        <i class="fas fa-check-circle text-indigo-500"></i>
+                    </a>
+                </div>
+                
+                <a href="dashboard.html#settings" class="nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-slate-600">
+                    <div class="menu-item-icon w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shadow-sm">
+                        <i class="fas fa-cog text-slate-600 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-base">Settings</span>
+                        <p class="text-xs text-slate-400 mt-0.5">Account & Profile</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
+                </a>
+            </div>
+            
+            <div class="py-4 border-t border-slate-100">
+                <button onclick="logout()" class="nav-link flex items-center gap-4 mx-3 px-4 py-3.5 rounded-2xl text-red-500 w-full">
+                    <div class="menu-item-icon w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                        <i class="fas fa-sign-out-alt text-red-500 text-lg"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <span class="font-semibold text-base">Logout</span>
+                        <p class="text-xs text-red-400 mt-0.5">Sign out account</p>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="py-6 px-4 bg-gradient-to-br from-slate-50 to-indigo-50 border-t border-slate-200">
+                <div class="text-center">
+                    <p class="text-sm font-semibold text-slate-700">QuizX v1.0</p>
+                    <p class="text-xs text-slate-400 mt-1">Made with <span class="text-red-500">❤</span> for learners</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 mb-4 shadow-xl shadow-amber-200">
+                <i class="fas fa-trophy text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">Global Leaderboard</h1>
+            <p class="text-slate-500 mt-2">Top performers across all categories</p>
+        </div>
+
+        <div id="filterBtns" class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide"></div>
+
+        <div id="leaderboardList" class="space-y-4"></div>
+
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trophy text-4xl text-indigo-400"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-slate-700 mb-2">No scores yet</h3>
+            <p class="text-slate-500 mb-6">Be the first to take a quiz and appear on the leaderboard!</p>
+            <a href="dashboard.html" class="inline-flex items-center gap-2 px-6 py-3 gradient-bg text-white rounded-xl font-semibold hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                <i class="fas fa-play"></i>
+                Start Quiz
+            </a>
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/quiz.js"></script>
+    <script>
+        if (!requireAuth()) { throw new Error('Auth required'); }
+
+        let allLeaderboard = [];
+        let desktopDropdownOpen = false;
+
+        function toggleDesktopDropdown() {
+            const dropdown = document.getElementById('desktopDropdown');
+            const btn = document.getElementById('desktopUserBtn');
+            
+            if (desktopDropdownOpen) {
+                dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = false;
+            } else {
+                dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = true;
+            }
+        }
+
+        function closeDesktopDropdown() {
+            if (desktopDropdownOpen) {
+                const dropdown = document.getElementById('desktopDropdown');
+                dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                desktopDropdownOpen = false;
+            }
+        }
+
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('open');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('mobileOverlay').classList.add('show');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('mobileOverlay').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('mobileOverlay').classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('desktopUserBtn').addEventListener('click', toggleDesktopDropdown);
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#desktopUserBtn') && !e.target.closest('#desktopDropdown')) {
+                closeDesktopDropdown();
+            }
+        });
+        
+        document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
+
+        async function loadLeaderboard() {
+            await initializeDatabase();
+            
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const session = sessionData ? JSON.parse(sessionData) : {};
+            const user = session.user || {};
+            
+            const initial = (user.name || 'U').charAt(0).toUpperCase();
+            document.getElementById('navAvatar').textContent = initial;
+            document.getElementById('navName').textContent = user.name || 'User';
+            document.getElementById('dropdownAvatar').textContent = initial;
+            document.getElementById('dropdownName').textContent = user.name || 'User';
+            document.getElementById('dropdownEmail').textContent = user.email || '';
+            document.getElementById('mobileAvatar').textContent = initial;
+            document.getElementById('mobileName').textContent = user.name || 'User';
+
+            const db = getDB();
+            const users = db.users || [];
+            const attempts = db.attempts || [];
+            
+            const userScores = {};
+            for (const attempt of attempts) {
+                if (!userScores[attempt.userId]) {
+                    const dbUser = users.find(u => u.id === attempt.userId);
+                    userScores[attempt.userId] = {
+                        userId: attempt.userId,
+                        name: dbUser ? dbUser.name : attempt.userName || 'Unknown',
+                        categoryId: attempt.categoryId,
+                        attempts: 0,
+                        totalPercentage: 0,
+                        bestScore: 0
+                    };
+                }
+                userScores[attempt.userId].attempts++;
+                userScores[attempt.userId].totalPercentage += (attempt.percentage || 0);
+                if ((attempt.percentage || 0) > userScores[attempt.userId].bestScore) {
+                    userScores[attempt.userId].bestScore = attempt.percentage || 0;
+                }
+            }
+            
+            allLeaderboard = Object.values(userScores).map(entry => ({
+                userId: entry.userId,
+                userName: entry.name,
+                categoryId: entry.categoryId,
+                attempts: entry.attempts,
+                avgScore: entry.attempts > 0 ? Math.round(entry.totalPercentage / entry.attempts) : 0,
+                bestScore: entry.bestScore
+            }));
+            
+            allLeaderboard.sort((a, b) => b.bestScore - a.bestScore);
+
+            const categories = db.categories ? db.categories.filter(c => c.isActive) : [];
+            const filterBtns = document.getElementById('filterBtns');
+            filterBtns.innerHTML = `
+                <button onclick="filterLeaderboard('')" class="filter-btn px-4 py-2 rounded-full gradient-bg text-white font-medium text-sm whitespace-nowrap shadow-lg shadow-indigo-200">
+                    <i class="fas fa-globe mr-1"></i> All
+                </button>
+                ${categories.map(cat => `
+                    <button onclick="filterLeaderboard('${cat.id}')" class="filter-btn px-4 py-2 rounded-full bg-white text-slate-600 font-medium text-sm hover:bg-slate-50 whitespace-nowrap border border-slate-200 shadow-sm" data-category="${cat.id}">
+                        <i class="fas ${cat.icon || 'fa-folder'} mr-1"></i> ${cat.name}
+                    </button>
+                `).join('')}
+            `;
+
+            filterLeaderboard('');
+        }
+
+        function filterLeaderboard(categoryId) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if ((categoryId === '' && btn.textContent.trim().includes('All')) || btn.dataset.category === categoryId) {
+                    btn.className = 'filter-btn px-4 py-2 rounded-full gradient-bg text-white font-medium text-sm whitespace-nowrap shadow-lg shadow-indigo-200';
+                } else {
+                    btn.className = 'filter-btn px-4 py-2 rounded-full bg-white text-slate-600 font-medium text-sm hover:bg-slate-50 whitespace-nowrap border border-slate-200 shadow-sm';
+                }
+            });
+
+            let filtered = categoryId ? allLeaderboard.filter(e => e.categoryId === categoryId) : allLeaderboard;
+            
+            const table = document.getElementById('leaderboardList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filtered.length === 0) {
+                table.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            const sessionData = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            const session = sessionData ? JSON.parse(sessionData) : {};
+            const currentUserId = session.user ? session.user.id : null;
+
+            const db = getDB();
+            const categories = db.categories || [];
+
+            table.innerHTML = filtered.map((entry, index) => {
+                const rank = index + 1;
+                const isCurrentUser = currentUserId && entry.userId === currentUserId;
+                const category = categories.find(c => c.id === entry.categoryId);
+                
+                let rankBadge, rankBg, rankShadow;
+                if (rank === 1) {
+                    rankBadge = '<i class="fas fa-crown text-yellow-500 text-xl"></i>';
+                    rankBg = 'bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-300';
+                    rankShadow = 'shadow-yellow-200';
+                } else if (rank === 2) {
+                    rankBadge = '<i class="fas fa-medal text-slate-400 text-xl"></i>';
+                    rankBg = 'bg-gradient-to-br from-slate-50 to-gray-50 border-2 border-slate-300';
+                    rankShadow = 'shadow-slate-200';
+                } else if (rank === 3) {
+                    rankBadge = '<i class="fas fa-medal text-amber-600 text-xl"></i>';
+                    rankBg = 'bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300';
+                    rankShadow = 'shadow-amber-200';
+                } else {
+                    rankBadge = `<span class="w-8 h-8 flex items-center justify-center rounded-full ${isCurrentUser ? 'gradient-bg text-white' : 'bg-slate-100 text-slate-600'} font-bold text-sm shadow-inner">${rank}</span>`;
+                    rankBg = 'bg-white';
+                    rankShadow = '';
+                }
+
+                const scoreColor = entry.bestScore >= 80 ? 'text-emerald-600 bg-emerald-50' : entry.bestScore >= 60 ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50';
+                const barColor = entry.bestScore >= 80 ? 'bg-emerald-500' : entry.bestScore >= 60 ? 'bg-amber-500' : 'bg-red-500';
+
+                return `
+                    <div class="card-hover rounded-2xl p-4 sm:p-5 ${rankBg} ${isCurrentUser ? 'ring-2 ring-indigo-500 ring-offset-2' : ''} shadow-lg ${rankShadow}">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <div class="flex-shrink-0 w-12 sm:w-14">${rankBadge}</div>
+                            <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl gradient-bg flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg shadow-indigo-200">
+                                ${(entry.userName || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-bold text-slate-800 truncate">${entry.userName}</p>
+                                    ${isCurrentUser ? '<span class="px-2 py-0.5 bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-full">You</span>' : ''}
+                                </div>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-xs text-slate-400"><i class="fas fa-redo mr-1"></i>${entry.attempts}</span>
+                                    <span class="text-xs text-slate-300 hidden sm:inline">•</span>
+                                    <span class="text-xs text-slate-400 hidden sm:inline"><i class="fas fa-layer-group mr-1"></i>${category ? category.name : 'Mixed'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${scoreColor} font-bold text-base sm:text-lg shadow-sm">
+                                    ${entry.bestScore}%
+                                </div>
+                                <div class="w-16 sm:w-24 h-2 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner">
+                                    <div class="h-full rounded-full ${barColor} transition-all duration-500" style="width: ${entry.bestScore}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadLeaderboard();
+    </script>
+</body>
+</html>

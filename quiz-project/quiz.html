@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        .quiz-container { margin-top: 4rem; }
+        @media (min-width: 768px) {
+            .quiz-container { margin-top: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50 md:hidden">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-indigo-600">QuizX</h1>
+            <a href="dashboard.html" class="p-2 rounded-lg hover:bg-gray-100">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="max-w-3xl mx-auto quiz-container p-4 md:p-6">
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h2 id="categoryName" class="text-lg sm:text-xl font-bold text-gray-800"></h2>
+                    <p class="text-sm text-gray-500">Question <span id="questionNum">1</span> of <span id="totalQuestions">10</span></p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="timer" class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-100 rounded-lg">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span id="timerValue" class="font-bold text-indigo-600">30</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-indigo-600 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 id="questionText" class="text-lg font-medium text-gray-800 mb-6"></h3>
+                <div id="optionsContainer" class="space-y-3"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 sm:pt-6 border-t border-gray-200">
+                <button onclick="prevQuestion()" id="prevBtn" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 order-2 sm:order-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex flex-wrap gap-2 sm:gap-3 order-1 sm:order-2">
+                    <button onclick="skipQuestion()" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">
+                        Skip
+                    </button>
+                    <button onclick="nextQuestion()" id="nextBtn" class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Next
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                    <button onclick="submitQuiz()" id="submitBtn" class="hidden px-4 sm:px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/quiz.js"></script>
+    <script>
+        if (!requireAuth()) { throw new Error('Auth required'); }
+
+        let timerInterval;
+        let currentTimer = 30;
+        let currentSession = null;
+        let selectedAnswer = null;
+
+        async function initQuiz() {
+            await initializeDatabase();
+            
+            currentSession = getQuizSession();
+            if (!currentSession || !currentSession.questions || currentSession.questions.length === 0) {
+                alert('No quiz session found. Please start a quiz first.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            let categoryName = 'General Quiz';
+            if (currentSession.categoryId) {
+                const db = getDB();
+                const category = db.categories ? db.categories.find(c => c.id === currentSession.categoryId) : null;
+                categoryName = category ? category.name : 'General Quiz';
+            }
+            document.getElementById('categoryName').textContent = categoryName;
+            document.getElementById('totalQuestions').textContent = currentSession.questions.length;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (!currentSession || !currentSession.questions || !currentSession.questions[currentSession.currentIndex]) {
+                alert('Error loading question. Please restart the quiz.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            const question = currentSession.questions[currentSession.currentIndex];
+            if (!question || !question.text || !question.options) {
+                alert('Invalid question data. Please restart the quiz.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            document.getElementById('questionNum').textContent = currentSession.currentIndex + 1;
+            document.getElementById('questionText').textContent = question.text;
+            
+            const progress = ((currentSession.currentIndex) / currentSession.questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            const existingAnswer = currentSession.answers ? currentSession.answers.find(a => a.questionId === question.id) : null;
+            selectedAnswer = existingAnswer ? existingAnswer.selectedAnswer : null;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = question.options.map((option, index) => `
+                <div onclick="selectOption(${index})" 
+                    class="quiz-option p-4 border-2 rounded-lg cursor-pointer ${selectedAnswer === index ? 'selected border-indigo-500' : 'border-gray-200'}">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 flex items-center justify-center rounded-full ${selectedAnswer === index ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600'} font-medium">
+                            ${String.fromCharCode(65 + index)}
+                        </span>
+                        <span class="text-gray-700">${option}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            updateNavButtons();
+            resetTimer();
+
+            if (currentSession.currentIndex === currentSession.questions.length - 1) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('submitBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('submitBtn').classList.add('hidden');
+            }
+        }
+
+        function selectOption(index) {
+            const question = currentSession.questions[currentSession.currentIndex];
+            
+            submitAnswer(question.id, index);
+            currentSession.answers = JSON.parse(sessionStorage.getItem('quiz_session')).answers;
+            selectedAnswer = index;
+            
+            document.querySelectorAll('.quiz-option').forEach((el, i) => {
+                if (i === index) {
+                    el.classList.add('selected', 'border-indigo-500');
+                    el.classList.remove('border-gray-200');
+                    el.querySelector('span:first-child').classList.add('bg-indigo-600', 'text-white');
+                    el.querySelector('span:first-child').classList.remove('bg-gray-100', 'text-gray-600');
+                } else {
+                    el.classList.remove('selected', 'border-indigo-500');
+                    el.classList.add('border-gray-200');
+                    el.querySelector('span:first-child').classList.remove('bg-indigo-600', 'text-white');
+                    el.querySelector('span:first-child').classList.add('bg-gray-100', 'text-gray-600');
+                }
+            });
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prevBtn').disabled = currentSession.currentIndex === 0;
+        }
+
+        function nextQuestion() {
+            clearInterval(timerInterval);
+            if (currentSession.currentIndex < currentSession.questions.length - 1) {
+                currentSession.currentIndex++;
+                sessionStorage.setItem('quiz_session', JSON.stringify(currentSession));
+                loadQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            clearInterval(timerInterval);
+            if (currentSession.currentIndex > 0) {
+                currentSession.currentIndex--;
+                sessionStorage.setItem('quiz_session', JSON.stringify(currentSession));
+                loadQuestion();
+            }
+        }
+
+        function skipQuestion() {
+            nextQuestion();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            currentTimer = currentSession.timePerQuestion || 30;
+            updateTimerDisplay();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                currentTimer--;
+                updateTimerDisplay();
+                
+                if (currentTimer <= 10) {
+                    document.getElementById('timer').classList.add('timer-warning');
+                }
+                
+                if (currentTimer <= 0) {
+                    clearInterval(timerInterval);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timerValue');
+            timerEl.textContent = currentTimer;
+            
+            if (currentTimer <= 10) {
+                timerEl.classList.add('text-red-600');
+                timerEl.classList.remove('text-indigo-600');
+                document.getElementById('timer').classList.add('bg-red-100');
+                document.getElementById('timer').classList.remove('bg-indigo-100');
+            } else {
+                timerEl.classList.remove('text-red-600');
+                timerEl.classList.add('text-indigo-600');
+                document.getElementById('timer').classList.remove('bg-red-100');
+                document.getElementById('timer').classList.add('bg-indigo-100');
+            }
+        }
+
+        async function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            const session = getQuizSession();
+            const user = getCurrentUser();
+            
+            if (!session) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            if (!user) {
+                alert('Please login to save your quiz');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const correctAnswers = session.answers ? session.answers.filter(a => a.isCorrect).length : 0;
+            const totalQuestions = session.questions ? session.questions.length : 1;
+            const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            
+            const attempt = {
+                id: 'att_' + Date.now(),
+                userId: user.id,
+                userName: user.name,
+                categoryId: session.categoryId || 'cat_1',
+                score: correctAnswers,
+                totalQuestions: totalQuestions,
+                percentage: percentage,
+                completedAt: new Date().toISOString(),
+                timeTaken: Math.round((Date.now() - session.startTime) / 1000)
+            };
+            
+            const db = getDB();
+            if (!db.attempts) db.attempts = [];
+            db.attempts.push(attempt);
+            
+            if (!db.leaderboard) db.leaderboard = [];
+            const existing = db.leaderboard.find(l => l.userId === user.id && l.categoryId === session.categoryId);
+            if (existing) {
+                if (percentage > existing.bestScore) existing.bestScore = percentage;
+                existing.lastScore = percentage;
+                existing.attempts = (existing.attempts || 0) + 1;
+            } else {
+                db.leaderboard.push({
+                    userId: user.id,
+                    userName: user.name,
+                    categoryId: session.categoryId || 'cat_1',
+                    bestScore: percentage,
+                    lastScore: percentage,
+                    attempts: 1
+                });
+            }
+            
+            saveDB(db);
+            
+            sessionStorage.setItem('quiz_result', JSON.stringify(attempt));
+            sessionStorage.setItem('refresh_dashboard', 'true');
+            sessionStorage.removeItem('quiz_session');
+            
+            window.location.href = 'results.html';
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

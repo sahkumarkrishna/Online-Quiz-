@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - QuizX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: blob 7s infinite;
+        }
+        
+        .blob-1 { width: 400px; height: 400px; background: #6366f1; top: -100px; left: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: #ec4899; bottom: -50px; right: -50px; animation-delay: -3s; }
+        .blob-3 { width: 250px; height: 250px; background: #8b5cf6; top: 50%; left: 50%; animation-delay: -5s; }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .floating { animation: floating 3s ease-in-out infinite; }
+        .floating-delay-1 { animation-delay: -1s; }
+        .floating-delay-2 { animation-delay: -2s; }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .input-float { transition: all 0.3s ease; }
+        .input-float:focus { transform: translateY(-2px); box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.5); }
+        
+        .btn-hover { position: relative; overflow: hidden; transition: all 0.4s ease; }
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-hover:hover::before { left: 100%; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeInUp 0.6s ease forwards; }
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        
+        .social-btn { transition: all 0.3s ease; }
+        .social-btn:hover { transform: translateY(-3px) scale(1.02); }
+        
+        .password-toggle { transition: all 0.3s ease; }
+        .password-toggle:hover { color: #6366f1; }
+        
+        .illustration-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        .strength-bar { transition: all 0.3s ease; }
+        
+        .check-icon { animation: checkmark 0.3s ease forwards; }
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Left Side - Illustration -->
+    <div class="hidden lg:flex lg:w-1/2 illustration-bg relative overflow-hidden">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        
+        <div class="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
+            <div class="absolute top-8 left-8 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <span class="text-white text-2xl font-bold">Q</span>
+                </div>
+                <span class="text-2xl font-bold">QuizX</span>
+            </div>
+            
+            <div class="text-center max-w-md">
+                <div class="relative mb-8">
+                    <div class="absolute -top-8 -left-8 w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm floating floating-delay-1 flex items-center justify-center">
+                        <i class="fas fa-rocket text-3xl"></i>
+                    </div>
+                    <div class="absolute -top-4 -right-12 w-16 h-16 rounded-full bg-yellow-400/30 backdrop-blur-sm floating floating-delay-2 flex items-center justify-center">
+                        <i class="fas fa-medal text-yellow-300 text-2xl"></i>
+                    </div>
+                    <div class="absolute -bottom-4 -left-4 w-14 h-14 rounded-xl bg-green-400/30 backdrop-blur-sm floating flex items-center justify-center">
+                        <i class="fas fa-fire text-green-300 text-xl"></i>
+                    </div>
+                    
+                    <div class="glass-effect rounded-3xl p-8 relative">
+                        <div class="w-24 h-24 mx-auto rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+                            <i class="fas fa-user-plus text-5xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Join Our Community</h3>
+                        <p class="text-white/80 text-sm">Create an account and start your learning adventure today</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-8 mt-8">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">Free</div>
+                        <div class="text-white/60 text-sm">Forever</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">100%</div>
+                        <div class="text-white/60 text-sm">Secure</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">24/7</div>
+                        <div class="text-white/60 text-sm">Support</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-8 left-8 right-8 glass-effect rounded-xl p-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <i class="fas fa-quote-left text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-white/90 text-sm">"The beautiful thing about learning is that no one can take it away from you."</p>
+                        <p class="text-white/60 text-xs mt-1">- B.B. King</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Side - Register Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
+        <div class="w-full max-w-md">
+            <!-- Mobile Logo -->
+            <div class="lg:hidden text-center mb-8">
+                <a href="index.html" class="inline-flex items-center gap-2">
+                    <div class="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
+                        <span class="text-white text-2xl font-bold">Q</span>
+                    </div>
+                    <span class="text-3xl font-bold gradient-text">QuizX</span>
+                </a>
+            </div>
+            <div class="animate-fade-in opacity-0" style="animation-fill-mode: forwards;">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
+                <p class="text-gray-500 mb-8">Join thousands of learners worldwide</p>
+            </div>
+            
+            <form id="registerForm" class="space-y-5">
+                <div class="animate-fade-in opacity-0 animate-delay-100" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" id="name" required minlength="2"
+                            class="input-float w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Enter your full name">
+                    </div>
+                </div>
+                
+                <div class="animate-fade-in opacity-0 animate-delay-100" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input type="email" id="email" required
+                            class="input-float w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Enter your email">
+                    </div>
+                </div>
+                
+                <div class="animate-fade-in opacity-0 animate-delay-200" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="password" required minlength="6"
+                            class="input-float w-full pl-12 pr-12 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Min 6 characters"
+                            oninput="checkPasswordStrength()">
+                        <button type="button" onclick="togglePassword('password', 'eyeIcon1')" class="password-toggle absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <i id="eyeIcon1" class="fas fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 flex gap-1">
+                        <div id="str1" class="h-1 flex-1 rounded-full bg-gray-200 strength-bar"></div>
+                        <div id="str2" class="h-1 flex-1 rounded-full bg-gray-200 strength-bar"></div>
+                        <div id="str3" class="h-1 flex-1 rounded-full bg-gray-200 strength-bar"></div>
+                        <div id="str4" class="h-1 flex-1 rounded-full bg-gray-200 strength-bar"></div>
+                    </div>
+                    <p id="strengthText" class="text-xs mt-1 text-gray-400"></p>
+                </div>
+                
+                <div class="animate-fade-in opacity-0 animate-delay-200" style="animation-fill-mode: forwards;">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="confirmPassword" required
+                            class="input-float w-full pl-12 pr-12 py-4 rounded-2xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none"
+                            placeholder="Confirm your password">
+                        <button type="button" onclick="togglePassword('confirmPassword', 'eyeIcon2')" class="password-toggle absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <i id="eyeIcon2" class="fas fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="errorMsg" class="hidden animate-fade-in">
+                    <div class="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="errorText"></span>
+                    </div>
+                </div>
+
+                <button type="submit" id="registerBtn" 
+                    class="btn-hover animate-fade-in opacity-0 animate-delay-300 w-full gradient-primary text-white py-4 rounded-2xl font-semibold text-lg shadow-lg shadow-indigo-300/50"
+                    style="animation-fill-mode: forwards;">
+                    Create Account
+                </button>
+            </form>
+            
+            <p class="text-center mt-8 text-gray-600">
+                Already have an account? 
+                <a href="login.html" class="text-indigo-600 font-semibold hover:text-indigo-500">Sign In</a>
+            </p>
+            
+            <div class="text-center mt-6">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-400 hover:text-indigo-600 transition-colors text-sm">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        initializeDatabase();
+
+        const session = localStorage.getItem('quizx_current_user');
+        if (session) {
+            const userData = JSON.parse(session);
+            if (userData.user) {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const str1 = document.getElementById('str1');
+            const str2 = document.getElementById('str2');
+            const str3 = document.getElementById('str3');
+            const str4 = document.getElementById('str4');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500', 'bg-green-500'];
+            const texts = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+            
+            [str1, str2, str3, str4].forEach((bar, i) => {
+                if (i < strength) {
+                    bar.className = `h-1 flex-1 rounded-full strength-bar ${colors[strength - 1]}`;
+                } else {
+                    bar.className = 'h-1 flex-1 rounded-full bg-gray-200 strength-bar';
+                }
+            });
+            
+            strengthText.textContent = strength > 0 ? texts[strength - 1] : '';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 transform transition-all duration-300 translate-x-full ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-indigo-500 text-white'
+            }`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+            const registerBtn = document.getElementById('registerBtn');
+
+            if (name.length < 2) {
+                errorText.textContent = 'Name must be at least 2 characters';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorText.textContent = 'Passwords do not match';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorText.textContent = 'Password must be at least 6 characters';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating account...';
+
+            const result = await register(name, email, password);
+
+            if (result.success) {
+                errorMsg.classList.add('hidden');
+                registerBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Success!';
+                registerBtn.classList.remove('gradient-primary');
+                registerBtn.classList.add('bg-green-500');
+                showToast('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } else {
+                errorText.textContent = result.message;
+                errorMsg.classList.remove('hidden');
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
